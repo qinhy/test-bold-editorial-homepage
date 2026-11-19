@@ -1,0 +1,106 @@
+# Bold Editorial — design tokens for the future Markdown-to-website compiler.
+# Version 1 is a specification, not yet a working generator configuration.
+version: 1
+id: bold-editorial
+name: Bold Editorial
+description: >-
+  An editorial, expressive and professional landing-page design: warm paper,
+  ink-dark typography, one rust accent, oversized serif headlines, restrained
+  asymmetric grids, and graphic dividers.
+
+site:
+  language: en  # Change to ja, zh, en-US, etc. for your content.
+
+identity:
+  mood: [confident, editorial, thoughtful, tactile, contemporary]
+  avoid: [neon-glow, glassmorphism, generic-saas-gradients, busy-animations, stock-photo-look]
+
+colors:
+  canvas: '#F5F1E9'
+  surface: '#FFFDF8'
+  ink: '#1D211E'
+  muted: '#565D56'
+  border: '#C8C3B8'
+  accent: '#9E3B2B'
+  accent_on_dark: '#FFD6C9'
+  inverted: '#1D211E'
+  inverted_text: '#FFFDF8'
+  focus: '#284FCA'
+
+fonts:
+  display: 'Georgia, "Times New Roman", serif'
+  body: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+  mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
+  network_fonts: false
+
+typography:
+  display_max: 'clamp(3.4rem, 8.5vw, 7.7rem)'
+  heading_2: 'clamp(2.25rem, 5vw, 4.25rem)'
+  heading_3: 'clamp(1.5rem, 2.6vw, 2.2rem)'
+  lead: 'clamp(1.1rem, 1.8vw, 1.45rem)'
+  body: '1rem'
+  line_height_body: 1.65
+  line_height_display: 0.98
+  heading_weight: 500
+  body_weight: 400
+  eyebrow:
+    transform: uppercase
+    letter_spacing: '0.13em'
+    size: '0.73rem'
+
+layout:
+  max_width: 1240
+  outer_gutter: 'clamp(1.1rem, 4vw, 3.75rem)'
+  grid_columns: 12
+  section_space: 'clamp(5rem, 11vw, 9rem)'
+  asymmetry: moderate
+  content_width_prose: '68ch'
+  card_radius: '0px'
+  border_weight: '1px'
+  imagery_style: 'architectural, abstract, editorial; never fabricate source photographs'
+
+components:
+  hero:
+    default: masthead_split
+    alternatives: [masthead_full, type_only]
+    show_eyebrow: true
+    heading_emphasis: italic_accent
+    decoration: abstract_circles
+  feature_grid:
+    default_columns_desktop: 3
+    columns_tablet: 2
+    columns_mobile: 1
+    numbered: true
+  project_showcase:
+    default_columns_desktop: 2
+    columns_mobile: 1
+    numbered: true
+  call_to_action:
+    variant: dark_band
+    max_primary_actions: 1
+  navigation:
+    sticky: false
+    style: bordered_header
+  footer:
+    style: compact_rule
+
+motion:
+  enabled: true
+  duration_ms: 180
+  allowed: [hover_underline, subtle_color_transition]
+  reduce_motion_respected: true
+  no_scroll_jacking: true
+
+accessibility:
+  target: WCAG-2.2-AA
+  preserve_focus_outlines: true
+  minimum_body_text_px: 16
+  require_meaningful_image_alt: true
+  avoid_color_only_meaning: true
+
+output:
+  static_html: true
+  responsive: true
+  no_required_external_assets: true
+  no_required_runtime_javascript: true
+  github_pages_safe_paths: true

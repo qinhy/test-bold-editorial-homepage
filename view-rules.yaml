@@ -1,0 +1,156 @@
+# Bold Editorial — content-to-view contract for the LLM planner and renderer.
+# This rules file is intentionally declarative and can be interpreted by a future
+# Python planner; until that exists it is a specification, not executable logic.
+version: 1
+theme: bold-editorial
+intent: 'Transform ordinary Markdown into a polished, accessible, static homepage.'
+
+inputs:
+  primary: content.md
+  optional: [style.yaml, view-rules.yaml, assets]
+  frontmatter_required: false
+  markdown_extensions: [tables, fenced_code, strikethrough]
+
+planning:
+  output: page-plan.json
+  policy: 'LLM decides presentation only; deterministic renderer owns HTML/CSS.'
+  infer_site_type: [company, product, portfolio, research, personal, documentation]
+  choose_theme: fixed
+  preserve_source_order: true
+  permit_reordering: false
+  preserve_all_meaningful_content: true
+  section_identity: 'Source heading slug plus occurrence index; stable on unchanged headings.'
+  allowed_section_types:
+    - hero_masthead
+    - editorial_intro
+    - feature_grid
+    - project_showcase
+    - prose
+    - image_feature
+    - pull_quote
+    - responsive_table
+    - code_block
+    - call_to_action
+    - faq
+    - footer
+
+matching_rules:
+  - id: hero
+    priority: 100
+    when: 'First level-1 heading and its following lead paragraph'
+    use: hero_masthead
+    notes: 'Exactly one hero. Site-title H1 may become the header wordmark and a verbatim lead sentence may become the visual H1; preserve both texts. Never invent a CTA, metric, subtitle, or image.'
+  - id: service_list
+    priority: 90
+    when: 'Heading signals services/features/capabilities AND children are independent list items'
+    use: feature_grid
+    notes: 'Use 2–4 columns based on count and available width; keep full descriptions.'
+  - id: project_items
+    priority: 85
+    when: 'Heading signals work/projects/case studies AND contains H3 subsections or discrete items'
+    use: project_showcase
+    notes: 'No fabricated client names, project imagery, metrics, or results.'
+  - id: explicit_quote
+    priority: 80
+    when: 'Markdown blockquote is standalone and concise'
+    use: pull_quote
+  - id: markdown_table
+    priority: 80
+    when: 'Markdown table'
+    use: responsive_table
+    notes: 'Allow horizontal scrolling on narrow screens; keep headers associated.'
+  - id: code
+    priority: 80
+    when: 'Fenced code block'
+    use: code_block
+    notes: 'Escape HTML; preserve indentation and language label.'
+  - id: faq
+    priority: 75
+    when: 'Heading indicates FAQ and contains question-like H3 subsections'
+    use: faq
+    notes: 'Render semantic definition/question structure; no invented answers.'
+  - id: closing_cta
+    priority: 70
+    when: 'Final section expressly calls for contact, signup, download, or exploration'
+    use: call_to_action
+    notes: 'Buttons only when an actual destination URL/email/hash is supplied.'
+  - id: section_with_image
+    priority: 60
+    when: 'Section has a provided image and substantive text'
+    use: image_feature
+    notes: 'Respect supplied asset paths; retain alt text and caption.'
+  - id: default
+    priority: 0
+    when: 'Everything else'
+    use: prose
+    notes: 'Never drop unsupported or ambiguous Markdown blocks.'
+
+visual_rules:
+  one_h1_only: true
+  hero_has_no_fake_media: true
+  prefer_asymmetric_layouts: true
+  never_use_random_visuals: true
+  max_accent_colors: 1
+  section_backgrounds: [canvas, surface, inverted]
+  grid_gaps: generous
+  text_alignment: primarily_left
+  cards: flat_editorial
+  borders: hairline
+  animation: minimal
+  preserve_inline_links: true
+
+safety_and_integrity:
+  untrusted_markdown: true
+  sanitize_raw_html: true
+  disallow_generated_inline_event_handlers: true
+  disallow_remote_scripts_by_default: true
+  reject_javascript_urls: true
+  no_invented_testimonials: true
+  no_invented_credentials_or_stats: true
+  no_invented_contact_details: true
+  maintain_source_attribution_when_present: true
+  preserve_heading_and_link_meaning: true
+
+accessibility_and_seo:
+  semantic_landmarks: [header, nav, main, section, footer]
+  keyboard_accessible: true
+  visible_focus_state: true
+  responsive_breakpoints_px: [640, 960]
+  use_document_title_and_meta_description: true
+  open_graph_metadata_if_supplied: true
+  descriptive_link_labels: true
+  respect_reduced_motion: true
+
+build_rules:
+  output_dir: dist
+  entrypoint: index.html
+  all_assets_local_or_explicitly_approved: true
+  support_project_site_base_path: true
+  output_js_optional: true
+  deterministic_renderer: true
+  validate_page_plan_against_schema: true
+  fail_build_on_unsafe_html: true
+  publish_only_after_successful_validation: true
+  cache_plan_for_unchanged_content: true
+  regenerate_changed_sections_when_supported: false
+
+llm_contract:
+  output_format: json_only
+  output_html: false
+  reference_source_blocks_instead_of_rewriting_copy: true
+  low_temperature_preferred: true
+  failure_behavior: 'Reuse last validated plan or fall back to prose-based deterministic layout.'
+  never:
+    - 'Omit source content solely for aesthetic reasons'
+    - 'Invent facts, metrics, images, contact information, or URLs'
+    - 'Render untrusted Markdown as executable scripts'
+    - 'Use proprietary fonts or external image libraries without permission'
+
+# Optional deterministic section choices used by CI even when no AI skill is invoked.
+# Source IDs are printed by `python -m homepage.cli inspect`.
+# Example:
+# section_overrides:
+#   our-approach:1:
+#     component: editorial_intro
+#     variant: asymmetric_prose
+section_overrides: {}

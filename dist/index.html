@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Face detection, rethought with trainable 1.58-bit convolutions."><meta name="theme-color" content="#F5F1E9">
+  <meta property="og:type" content="website"><meta property="og:title" content="TernaryCNN RetinaFace">
+  <meta property="og:description" content="Face detection, rethought with trainable 1.58-bit convolutions.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self'; style-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'; script-src 'none'">
+  <title>TernaryCNN RetinaFace</title><link rel="stylesheet" href="./style.css">
+</head><body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="wrap nav"><a class="brand" href="#top" aria-label="TernaryCNN RetinaFace, home"><span class="brandmark" aria-hidden="true">T</span><span>TernaryCNN RetinaFace</span></a>
+    <nav class="navlinks" aria-label="Main navigation"><a href="#features">Features</a><a href="#architecture">Architecture</a><a href="#measured-result">Measured result</a><a href="#training-profiles">Training profiles</a></nav></header>
+  <main id="main"><section class="hero variant-masthead_split" id="top" aria-labelledby="page-title"><div class="wrap">
+      <div class="hero-top"><span class="hero-kicker micro">TernaryCNN RetinaFace</span><span class="micro">Bold Editorial</span></div>
+      <div class="hero-grid"><div><h1 id="page-title">Face detection, rethought with trainable 1.58-bit convolutions.</h1><div class="hero-copy">
+<p>A compact RetinaFace implementation built around <strong>TernaryCNN</strong> convolutions across its ResNet backbone, feature pyramid, context modules, and prediction heads. It supports face boxes, classification scores, and five-point facial landmarks.</p>
+<p><a href="#features">Explore the features</a> · <a href="#measured-result">See the measured result</a> · <a href="#quick-start">Quick start</a></p>
+</div></div>
+      <div class="art" role="img" aria-label="Abstract geometric editorial illustration"><span class="art-lines" aria-hidden="true"></span><span class="art-circle" aria-hidden="true"></span><span class="art-note">Bold Editorial</span></div></div>
+      </div></section><section class="content-section section-feature_grid variant-numbered_three_up" id="features" aria-labelledby="heading-features">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">01 /</span>
+      <h2 id="heading-features">Features</h2></div></div><div class="prose"><div class="cards"><article class="card"><span class="num">01 /</span><div class="card-copy"><strong>Ternary backbones</strong> — ResNet-18 and ResNet-50 options with C3, C4, and C5 feature extraction.</div></article><article class="card"><span class="num">02 /</span><div class="card-copy"><strong>Multi-scale perception</strong> — A three-level feature pyramid (FPN) and SSH context blocks.</div></article><article class="card"><span class="num">03 /</span><div class="card-copy"><strong>Face and landmark detection</strong> — Box, class, and five-point landmark prediction heads.</div></article><article class="card"><span class="num">04 /</span><div class="card-copy"><strong>Training-ready losses</strong> — Prior matching, hard-negative mining, and Smooth L1 losses for boxes and landmarks.</div></article><article class="card"><span class="num">05 /</span><div class="card-copy"><strong>WIDER FACE support</strong> — A RetinaFace-style <code>label.txt</code> reader with normalized coordinates and missing-landmark handling.</div></article><article class="card"><span class="num">06 /</span><div class="card-copy"><strong>Tools for experimentation</strong> — Training CLI, annotated-image inference CLI, Tkinter prediction GUI, unit tests, and a generated-data smoke test.</div></article></div>
+</div></div>
+    </section><section class="content-section section-responsive_table variant-regular" id="architecture" aria-labelledby="heading-architecture">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">02 /</span>
+      <h2 id="heading-architecture">Architecture</h2></div></div><div class="prose"><p>The model couples a <strong>ternary R18 or R50 backbone</strong> with three-scale feature fusion and SSH context processing. The prediction heads return three tensors, in this order:</p>
+<div aria-label="Scrollable data table" class="table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Prediction</th>
+<th>Output shape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Box offsets</td>
+<td><code>[batch, anchors, 4]</code></td>
+</tr>
+<tr>
+<td>Class logits</td>
+<td><code>[batch, anchors, 2]</code></td>
+</tr>
+<tr>
+<td>Landmark offsets</td>
+<td><code>[batch, anchors, 10]</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The pipeline includes vectorized prior generation, target matching, box and landmark encoding/decoding, and non-maximum suppression (NMS).</p>
+</div></div>
+    </section><section class="content-section section-prose variant-regular" id="measured-result" aria-labelledby="heading-measured-result">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">03 /</span>
+      <h2 id="heading-measured-result">Measured result</h2></div></div><div class="prose"><p>A recorded <strong>R18 / 320 px ternary validation</strong> at epoch 54 reported <strong>AP@0.5 = 0.3540</strong> on the 3,226-image WIDER FACE validation split.</p>
+<ul>
+<li><strong>Backbone:</strong> R18; 320 × 320 input; 64 FPN channels.</li>
+<li><strong>Validation:</strong> 3,226 images; ternary validation loss 4.9259.</li>
+<li><strong>Training run:</strong> 12,880 training images and 11,788,640 parameters, as reported in the example log.</li>
+<li><strong>Checkpoint:</strong> <code>retinaface-r18-best-ternary.pt</code> stores frozen ternary weights selected by ternary validation AP@0.5.</li>
+</ul>
+<p>This is a <strong>specific training-log snapshot</strong>, not a claim of state-of-the-art accuracy, production reliability, or a general hardware speedup. QAT and frozen ternary models are validated and ranked independently.</p>
+</div></div>
+    </section><section class="content-section section-responsive_table variant-regular" id="training-profiles" aria-labelledby="heading-training-profiles">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">04 /</span>
+      <h2 id="heading-training-profiles">Training profiles</h2></div></div><div class="prose"><p>Start small to verify the full training and evaluation path, then scale up when the model and data pipeline are stable.</p>
+<div aria-label="Scrollable data table" class="table-scroll" role="region" tabindex="0"><table>
+<thead>
+<tr>
+<th>Profile</th>
+<th>Backbone</th>
+<th>Input</th>
+<th>FPN channels</th>
+<th>Batch size</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Recommended first run</td>
+<td>R18</td>
+<td>320 px</td>
+<td>64</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Higher-capacity run</td>
+<td>R50</td>
+<td>640 px</td>
+<td>256</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Lower-memory run</td>
+<td>R18</td>
+<td>256 px</td>
+<td>32</td>
+<td>4</td>
+</tr>
+</tbody>
+</table></div>
+<p>The source examples target <strong>100 epochs</strong> and use CUDA. Set <code>--device auto</code> for a device fallback. Larger images and R50 require more memory and compute; smaller images reduce detail available for small faces.</p>
+</div></div>
+    </section><section class="content-section section-code_block variant-regular" id="quick-start" aria-labelledby="heading-quick-start">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">05 /</span>
+      <h2 id="heading-quick-start">Quick start</h2></div></div><div class="prose"><p>Run the following commands <strong>inside the TernaryCNN-RetinaFace model repository</strong>, rather than inside this homepage generator:</p>
+<pre><code class="language-bash">uv sync --group dev
+uv run pytest
+uv run ruff check .
+</code></pre>
+<p>Exercise model construction, target matching, loss calculation, backpropagation, checkpoint saving, and ternary conversion <strong>without downloading WIDER FACE</strong>:</p>
+<pre><code class="language-bash">uv run python -m ternarycnn_retinaface.train \
+  --smoke-test --save checkpoints/smoke.pt
+</code></pre>
+<p>The original development layout uses a local sibling <code>TernaryCNN</code> package. For a standalone clone, remove <code>[tool.uv.sources]</code> from the model project's <code>pyproject.toml</code> to use its configured Git dependency instead.</p>
+</div></div>
+    </section><section class="content-section section-prose variant-regular" id="training-and-checkpoints" aria-labelledby="heading-training-and-checkpoints">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">06 /</span>
+      <h2 id="heading-training-and-checkpoints">Training and checkpoints</h2></div></div><div class="prose"><p>With a WIDER FACE dataset under <code>data/widerface/</code>, the R18 starter configuration uses <code>WIDER_train/images</code>, <code>WIDER_val/images</code>, and their corresponding <code>train/label.txt</code> and <code>val/label.txt</code> files.</p>
+<p>A training run can save three distinct artifacts:</p>
+<ul>
+<li><strong>Latest resumable checkpoint:</strong> <code>retinaface-r18.pt</code> — model, optimizer, scheduler, epoch, metrics, and RNG state.</li>
+<li><strong>Best QAT checkpoint:</strong> <code>retinaface-r18-best.pt</code> — weights chosen by QAT validation AP@0.5.</li>
+<li><strong>Best frozen ternary checkpoint:</strong> <code>retinaface-r18-best-ternary.pt</code> — inference-only weights chosen by ternary validation AP@0.5.</li>
+</ul>
+<p>Resuming uses <code>--resume</code> with the latest checkpoint. The <code>--epochs</code> option means the <strong>final epoch target</strong>, not the number of extra epochs. Validation runs over the full WIDER validation split for both QAT and ternary variants, so it can add substantial processing time.</p>
+</div></div>
+    </section><section class="content-section section-code_block variant-regular" id="inference" aria-labelledby="heading-inference">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">07 /</span>
+      <h2 id="heading-inference">Inference</h2></div></div><div class="prose"><p>Run annotated-image inference from a trained checkpoint:</p>
+<pre><code class="language-bash">uv run python -m ternarycnn_retinaface.infer \
+  checkpoints/retinaface-r50.pt photo.jpg \
+  --output prediction.jpg --score-threshold 0.5
+</code></pre>
+<p>Or launch the desktop GUI to select a checkpoint, choose an image, view boxes, scores, and landmarks, and save the annotated prediction:</p>
+<pre><code class="language-bash">uv run python -m ternarycnn_retinaface.gui
+</code></pre>
+<p>The Python API exposes <code>BitRetinaFace</code> and <code>RetinaFaceAnchors</code> for integration into custom inference or evaluation workflows.</p>
+</div></div>
+    </section><section class="content-section section-image_feature variant-regular" id="training-example" aria-labelledby="heading-training-example">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">08 /</span>
+      <h2 id="heading-training-example">Training example</h2></div></div><div class="prose"><p><img alt="RetinaFace ternary-model training prediction example" src="assets/ChatGPTImage16_02_44-prediction.jpg"/></p>
+<p>The source README associates this prediction example with a <strong>ternary validation AP@0.5 of 0.3540</strong>. The figure uses the original image filename so it can be replaced without changing the Markdown link.</p>
+</div></div>
+    </section><section class="content-section section-editorial_intro variant-asymmetric_prose editorial-intro" id="current-scope" aria-labelledby="heading-current-scope">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">09 /</span>
+      <h2 id="heading-current-scope">Current scope</h2></div></div><div class="prose"><p>The training pipeline currently resizes images to a square and applies horizontal flipping. The source identifies RetinaFace-style random square cropping and photometric augmentation as useful future extensions for fuller WIDER FACE training.</p>
+<p>Training previews are saved by epoch when enabled. The inference CLI and desktop GUI can save annotated prediction images showing boxes, scores, and landmarks.</p>
+</div></div>
+    </section><section class="content-section section-editorial_intro variant-asymmetric_prose editorial-intro" id="explore-the-model" aria-labelledby="heading-explore-the-model">
+      <div class="wrap"><div class="section-head"><div><span class="micro section-no">10 /</span>
+      <h2 id="heading-explore-the-model">Explore the model</h2></div></div><div class="prose"><p>This project brings ternary convolutions into an end-to-end RetinaFace training and inference workflow, with reproducible commands and separate QAT/ternary validation. <strong>Start with the smoke test</strong>, then try the R18 / 320 px training profile before scaling up.</p>
+<p><a href="#quick-start">Jump to Quick start</a> · <a href="#training-profiles">Review training profiles</a></p>
+</div></div>
+    </section></main>
+  <footer class="wrap page-footer"><span>TernaryCNN RetinaFace</span><span>Built from Markdown · Bold Editorial</span></footer>
+</body></html>

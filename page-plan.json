@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "theme": "bold-editorial",
+  "source_sha256": "4e37d6ba04894fc2a2abf22fae4161f9b7893f532eaee13955290482b1a58070",
+  "rules_sha256": "42835fc04bd4f47114d250b1a902a449719b664ac75d9702462746c37152a10a",
+  "sections": [
+    {
+      "source_id": "ternarycnn-retinaface:1",
+      "component": "hero_masthead",
+      "variant": "masthead_split"
+    },
+    {
+      "source_id": "features:1",
+      "component": "feature_grid",
+      "variant": "numbered_three_up"
+    },
+    {
+      "source_id": "architecture:1",
+      "component": "responsive_table",
+      "variant": "regular"
+    },
+    {
+      "source_id": "measured-result:1",
+      "component": "prose",
+      "variant": "regular"
+    },
+    {
+      "source_id": "training-profiles:1",
+      "component": "responsive_table",
+      "variant": "regular"
+    },
+    {
+      "source_id": "quick-start:1",
+      "component": "code_block",
+      "variant": "regular"
+    },
+    {
+      "source_id": "training-and-checkpoints:1",
+      "component": "prose",
+      "variant": "regular"
+    },
+    {
+      "source_id": "inference:1",
+      "component": "code_block",
+      "variant": "regular"
+    },
+    {
+      "source_id": "training-example:1",
+      "component": "image_feature",
+      "variant": "regular"
+    },
+    {
+      "source_id": "current-scope:1",
+      "component": "editorial_intro",
+      "variant": "asymmetric_prose"
+    },
+    {
+      "source_id": "explore-the-model:1",
+      "component": "editorial_intro",
+      "variant": "asymmetric_prose"
+    }
+  ]
+}
