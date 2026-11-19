@@ -5,26 +5,23 @@ on:
     branches: [main]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+# Default to no token permissions; each job asks only for what it needs.
+permissions: {}
 
 concurrency:
   group: github-pages
-  cancel-in-progress: true
+  cancel-in-progress: false  # never interrupt a production deployment halfway
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.12'
           cache: pip
@@ -36,12 +33,27 @@ jobs:
         run: python -m homepage.cli build
       - name: Validate production output
         run: python -m homepage.cli validate
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
       - name: Upload site files
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
+
+  # Deploying in a separate job avoids an intermittent race in which deploy-pages
+  # lists the run's artifacts a moment before the upload is visible
+  # ("No artifacts named github-pages were found"; actions/deploy-pages#451).
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      actions: read
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
