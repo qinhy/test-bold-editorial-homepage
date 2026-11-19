@@ -9,8 +9,8 @@ import pytest
 from bs4 import BeautifulSoup
 
 from homepage.cli import main
-from homepage.core import BuildError, automatic_plan, load_yaml, read_source, validate_plan
-from homepage.render import css_for
+from homepage.core import BuildError, automatic_plan, load_yaml, read_source, text_digest, validate_plan
+from homepage.render import css_for, fingerprint_glyph, image_size
 
 PROJECT = Path(__file__).resolve().parents[1]
 
@@ -273,3 +273,111 @@ def test_removing_prediction_image_fails_instead_of_publishing_broken_url(tmp_pa
     (root / 'assets/ChatGPTImage16_02_44-prediction.jpg').unlink()
     assert run_cmd(root, 'build') == 2
     assert not (root / 'dist/index.html').exists()
+
+
+# --- v0.2 polish: line endings, fonts, presentation helpers, output integrity ---
+
+def test_crlf_checkout_does_not_make_plan_stale(tmp_path):
+    root = create_project(tmp_path)
+    assert run_cmd(root, 'plan') == 0
+    for name in ('content.md', 'view-rules.yaml'):
+        path = root / name
+        path.write_bytes(path.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
+    assert run_cmd(root, 'build', '--require-plan') == 0
+
+
+def test_text_digest_ignores_line_endings(tmp_path):
+    a, b = tmp_path / 'a.yaml', tmp_path / 'b.yaml'
+    a.write_bytes(b'version: 1\nx: 2\n')
+    b.write_bytes(b'version: 1\r\nx: 2\r\n')
+    assert text_digest(a) == text_digest(b)
+
+
+def test_local_fonts_are_published_with_licences(tmp_path):
+    root = create_project(tmp_path)
+    assert run_cmd(root, 'build') == 0
+    css = (root / 'dist/style.css').read_text(encoding='utf-8')
+    for face in load_yaml(root / 'style.yaml')['fonts']['local_faces']:
+        assert face['file'] in css
+        assert (root / 'dist' / face['file']).is_file()
+    assert list((root / 'dist/assets/fonts').glob('*.txt'))
+    assert read_html(root).select_one('link[rel="preload"][as="font"]')
+
+
+def test_missing_local_font_fails_build(tmp_path):
+    root = create_project(tmp_path)
+    next((root / 'assets/fonts').glob('*.woff2')).unlink()
+    assert run_cmd(root, 'build') == 2
+
+
+def test_font_paths_outside_assets_are_rejected():
+    style = load_yaml(PROJECT / 'style.yaml')
+    style['fonts']['local_faces'] = [{'family': 'Evil', 'file': '../secret.woff2'}]
+    with pytest.raises(BuildError, match='assets/fonts'):
+        css_for(style)
+    style['fonts']['local_faces'] = [{'family': 'x"}body{color:red', 'file': 'assets/fonts/a.woff2'}]
+    with pytest.raises(BuildError, match='family'):
+        css_for(style)
+
+
+def test_system_fonts_still_work_without_local_faces(tmp_path):
+    root = create_project(tmp_path)
+    import yaml
+    style = load_yaml(root / 'style.yaml')
+    del style['fonts']['local_faces']
+    (root / 'style.yaml').write_text(yaml.safe_dump(style, sort_keys=False), encoding='utf-8')
+    assert run_cmd(root, 'build') == 0
+    assert '@font-face' not in (root / 'dist/style.css').read_text(encoding='utf-8')
+
+
+def test_link_rows_become_actions_without_losing_text(tmp_path):
+    root = create_project(tmp_path, '# Site\n\nA headline for the page.\n\n[One](#more) · [Two](#more)\n\n## More\n\nBody.\n')
+    assert run_cmd(root, 'build') == 0
+    row = read_html(root).select_one('.hero .actions')
+    assert row is not None and len(row.find_all('a')) == 2
+    assert '·' in row.get_text()
+
+
+def test_bold_label_lists_become_fact_tables(tmp_path):
+    root = create_project(tmp_path, '# Site\n\nA headline for the page.\n\n## Numbers\n\n- **Size:** large\n- **Speed:** fast\n')
+    assert run_cmd(root, 'build') == 0
+    facts = read_html(root).select_one('#numbers ul.facts')
+    assert facts is not None
+    assert 'Size:' in facts.get_text() and 'fast' in facts.get_text()
+
+
+def test_code_blocks_get_language_label_and_escape_html(tmp_path):
+    root = create_project(tmp_path, '# Site\n\nA headline for the page.\n\n## Code\n\n```bash\necho "<script>x</script>"\n```\n')
+    assert run_cmd(root, 'build') == 0
+    page = read_html(root)
+    assert page.select_one('#code .code-lang').get_text() == 'bash'
+    assert page.find('script') is None
+    assert '<script>x</script>' in page.select_one('#code pre').get_text()
+
+
+def test_hero_glyph_is_deterministic_and_content_bound():
+    first = fingerprint_glyph('0' * 64)
+    assert first == fingerprint_glyph('0' * 64)
+    assert first != fingerprint_glyph('1' * 64)
+    assert first.count('<i ') == 64 and 'aria-hidden="true"' in first
+
+
+def test_images_get_intrinsic_size(tmp_path):
+    root = create_project(tmp_path)
+    assert run_cmd(root, 'build') == 0
+    img = read_html(root).select_one('#training-example img')
+    size = image_size(root / img['src'])
+    assert size and (img['width'], img['height']) == (str(size[0]), str(size[1]))
+
+
+def test_validate_detects_missing_published_file(tmp_path):
+    root = create_project(tmp_path)
+    assert run_cmd(root, 'build') == 0
+    (root / 'dist/assets/ChatGPTImage16_02_44-prediction.jpg').unlink()
+    assert run_cmd(root, 'validate') == 2
+
+
+def test_no_inline_styles_for_strict_csp(tmp_path):
+    root = create_project(tmp_path)
+    assert run_cmd(root, 'build') == 0
+    assert not read_html(root).find(style=True)

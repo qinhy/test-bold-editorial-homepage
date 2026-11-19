@@ -11,11 +11,16 @@ This open-source-ready starter is a **Markdown website compiler**, not a chat UI
 - **Theme:** Bold Editorial: warm paper, large serif headlines, rust-red accents, asymmetrical grids
 
 
-### Prediction image asset
+### What the page looks like
 
-The original model README linked to `./asset/ChatGPTImage16_02_44-prediction.jpg` but did **not** include the JPEG file in the supplied Markdown. The homepage link is restored as `assets/ChatGPTImage16_02_44-prediction.jpg` to match this generator's asset-copying convention.
+- **Hero:** the opening sentence of `content.md` becomes the display headline; the next paragraph is the lead, and a line of links becomes a primary button plus text links. Beside it sits an 8×8 *content fingerprint*: three-state marks derived from the SHA-256 of `content.md`. It is abstract, deterministic and invents nothing, and it changes whenever your content does.
+- **Sections:** a sticky left rail (section number and heading) with content in the right eight columns; lists of features, project collections and images use the full width.
+- **Details:** `**Label:** value` lists render as label/value tables, fenced code shows its language, tables scroll sideways on phones with an edge shadow, and images get intrinsic sizes to avoid layout shift.
+- **Type:** Newsreader (headlines), IBM Plex Sans (body) and IBM Plex Mono (code), self-hosted from `assets/fonts/` under the SIL Open Font License. Delete `fonts.local_faces` in `style.yaml` to fall back to system fonts.
 
-This repository temporarily bundles a **visibly labeled placeholder**, not a reproduction or a model output. **Before public release, replace `assets/ChatGPTImage16_02_44-prediction.jpg` with the original JPEG.** Do not change the Markdown image path. Running the homepage skill or `python -m homepage.cli build` copies the file into `dist/assets/`. If you remove the asset without replacing it, the build intentionally fails rather than publishing a broken image.
+### Training example image
+
+`assets/ChatGPTImage16_02_44-prediction.jpg` is the annotated prediction example referenced from `content.md` (boxes and five-point landmarks). Keep the Markdown path unchanged if you swap the file. The build copies it into `dist/assets/` and fails rather than publishing a broken image if it goes missing. Confirm you have the right to publish any image before release.
 
 ## Quick start
 
@@ -115,7 +120,7 @@ The example email above is illustrative; replace it with a real address before p
 
 ## Customization
 
-- **`style.yaml`:** Brand colors and safe font stacks, site language, page width, design intent and layout tokens. The renderer currently applies palette, font stacks and max width from this file; the remaining entries guide the agent.
+- **`style.yaml`:** Brand colors, font stacks, self-hosted font files (`fonts.local_faces`), site language, page width, design intent and layout tokens. The renderer applies the palette, fonts and max width; the remaining entries guide the agent.
 - **`view-rules.yaml`:** Declarative content-to-layout design contract for the agent. For non-agent builds, add explicit `section_overrides` with source IDs returned by `python -m homepage.cli inspect`.
 - **`page-plan.json`:** Model-authored choices, validated against the current `content.md` and `view-rules.yaml` SHA-256 fingerprints. Editing Markdown makes this plan stale; calling the skill refreshes it. Never put HTML or invented copy here.
 - **`homepage/render.py`:** The deterministic HTML templates and responsive CSS.
@@ -126,13 +131,13 @@ More detail: [Architecture and safety](docs/ARCHITECTURE.md) and [Agent invocati
 
 ## Production-readiness scope
 
-Included: source-preserving rendering, responsive CSS, semantic HTML, keyboard focus styles, a skip link, safe Markdown parsing with raw HTML disabled, blocked remote/unsafe assets, link/anchor checking, a restrictive CSP, local preview, tests, source-addressed layouts, and GitHub Pages CI/CD.
+Included: source-preserving rendering, responsive CSS, semantic HTML, keyboard focus styles, a skip link, safe Markdown parsing with raw HTML disabled, blocked remote/unsafe assets, link/anchor checking, a restrictive CSP (no scripts, no inline styles, fonts and images from the site only), validation that every referenced file was published, line-ending-independent plan fingerprints, print styles, local preview, tests, source-addressed layouts, and GitHub Pages CI/CD.
 
 You should still visually review your published site and confirm its content, licensing, image rights and links. Accessibility compliance and search engine ranking are **not** guaranteed by a static validator. No generated page has been deployed to your account automatically.
 
 ## Requirements and support
 
-Python 3.11+ and the libraries in `requirements.txt`. A Codex or Claude Code environment is needed **only** for AI-guided layout selection. GitHub Pages hosting requires a GitHub account/repository.
+Python 3.11+ and the libraries in `requirements.txt`. See `CHANGELOG.md` for what changed between versions. A Codex or Claude Code environment is needed **only** for AI-guided layout selection. GitHub Pages hosting requires a GitHub account/repository.
 
 ## License
 

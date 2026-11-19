@@ -2,14 +2,13 @@
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from functools import partial
 from pathlib import Path
 
-from .core import BuildError, automatic_plan, load_yaml, read_plan, read_source, validate_plan, write_plan
+from .core import BuildError, automatic_plan, text_digest, load_yaml, read_plan, read_source, validate_plan, write_plan
 from .render import render_page, validate_output
 
 
@@ -55,7 +54,7 @@ def main(argv: list[str] | None = None) -> int:
             return 0
         source, style, rules = load_project(root)
         theme = style['id']
-        rules_digest = hashlib.sha256((root / 'view-rules.yaml').read_bytes()).hexdigest()
+        rules_digest = text_digest(root / 'view-rules.yaml')
         auto = automatic_plan(source, theme, rules, rules_sha256=rules_digest)
         if args.command == 'inspect':
             print(json.dumps({

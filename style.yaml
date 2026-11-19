@@ -1,5 +1,6 @@
-# Bold Editorial — design tokens for the future Markdown-to-website compiler.
-# Version 1 is a specification, not yet a working generator configuration.
+# Bold Editorial — design tokens for the Markdown-to-homepage compiler.
+# The renderer applies colors, fonts (including fonts.local_faces) and layout.max_width.
+# Everything else here guides the layout planner (Codex / Claude Code skill).
 version: 1
 id: bold-editorial
 name: Bold Editorial
@@ -28,10 +29,18 @@ colors:
   focus: '#284FCA'
 
 fonts:
-  display: 'Georgia, "Times New Roman", serif'
-  body: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
-  mono: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
-  network_fonts: false
+  display: '"Newsreader", Georgia, "Times New Roman", serif'
+  body: '"IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif'
+  mono: '"IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace'
+  network_fonts: false   # Never load fonts from a CDN; the page CSP only allows 'self'.
+  # Self-hosted, SIL OFL-licensed WOFF2 files (licences live next to them in assets/fonts/).
+  # Remove an entry (or the whole list) to fall back to the system fonts in the stacks above.
+  # The first entry is preloaded, so keep the headline face first.
+  local_faces:
+    - {family: Newsreader, file: assets/fonts/newsreader-latin-opsz-normal.woff2, weight: '200 800', style: normal}
+    - {family: IBM Plex Sans, file: assets/fonts/ibm-plex-sans-latin-400-normal.woff2, weight: '400', style: normal}
+    - {family: IBM Plex Sans, file: assets/fonts/ibm-plex-sans-latin-600-normal.woff2, weight: '600', style: normal}
+    - {family: IBM Plex Mono, file: assets/fonts/ibm-plex-mono-latin-400-normal.woff2, weight: '400', style: normal}
 
 typography:
   display_max: 'clamp(3.4rem, 8.5vw, 7.7rem)'
@@ -41,7 +50,7 @@ typography:
   body: '1rem'
   line_height_body: 1.65
   line_height_display: 0.98
-  heading_weight: 500
+  heading_weight: 400
   body_weight: 400
   eyebrow:
     transform: uppercase
@@ -65,7 +74,7 @@ components:
     alternatives: [masthead_full, type_only]
     show_eyebrow: true
     heading_emphasis: italic_accent
-    decoration: abstract_circles
+    decoration: content_fingerprint  # 8×8 three-state marks derived from the SHA-256 of content.md
   feature_grid:
     default_columns_desktop: 3
     columns_tablet: 2

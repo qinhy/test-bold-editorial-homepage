@@ -8,4 +8,4 @@ This repository is a Markdown-to-static-homepage compiler. The canonical source 
 - A page plan is only layout decisions tied to `source_sha256`; it cannot contain arbitrary HTML or invented copy.
 - Do not make network requests, add script tags, or push changes without user authorization.
 - When changing behavior, run `python -m pytest -q` and rebuild `dist/`.
-- Generated output: `dist/index.html`, `dist/style.css`, `dist/.nojekyll`, and referenced safe assets.
+- Generated output: `dist/index.html`, `dist/style.css`, `dist/.nojekyll`, referenced safe assets, and `dist/assets/fonts/` (fonts + licences).

@@ -125,6 +125,16 @@ def read_source(path: Path) -> Source:
     return Source(text, hashlib.sha256(text.encode('utf-8')).hexdigest(), title, sections)
 
 
+def text_digest(path: Path) -> str:
+    """SHA-256 of a text file with line endings normalized to LF.
+
+    Windows checkouts (``core.autocrlf``) rewrite LF as CRLF; hashing raw bytes
+    would make an unchanged view-rules.yaml look edited and invalidate the plan.
+    """
+    data = path.read_bytes().replace(b'\r\n', b'\n')
+    return hashlib.sha256(data).hexdigest()
+
+
 def load_yaml(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise BuildError(f'Missing config: {path}')
@@ -148,7 +158,7 @@ def inferred_component(section: Section, *, first: bool, last: bool) -> str:
         return 'feature_grid'
     if any(w in heading for w in ('work', 'project', 'portfolio', 'case stud', '事例', '実績', 'プロジェクト', '作品')) and ('heading_open' in bodytypes or 'bullet_list_open' in bodytypes):
         return 'project_showcase'
-    if last and any(w in heading for w in ('contact', 'get in touch', 'build something', 'start', 'reach us', '問い合わせ', '連絡', 'お問い合わせ')):
+    if last and any(w in heading for w in ('contact', 'get in touch', 'build something', 'start', 'reach us', 'explore', 'try ', 'download', 'join', 'sign up', '問い合わせ', '連絡', 'お問い合わせ')):
         return 'call_to_action'
     if 'image' in bodytypes or any(t.type == 'inline' and any(c.type == 'image' for c in (t.children or [])) for t in section.body_tokens()):
         return 'image_feature'

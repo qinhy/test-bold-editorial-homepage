@@ -1,6 +1,6 @@
 # Bold Editorial — content-to-view contract for the LLM planner and renderer.
-# This rules file is intentionally declarative and can be interpreted by a future
-# Python planner; until that exists it is a specification, not executable logic.
+# matching_rules are guidance for the agent skill; the deterministic fallback in
+# homepage/core.py uses heading keywords. section_overrides (bottom) apply everywhere.
 version: 1
 theme: bold-editorial
 intent: 'Transform ordinary Markdown into a polished, accessible, static homepage.'

@@ -1,2 +1,11 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Store and check out text files with LF endings on every OS, so content and
+# rule fingerprints in page-plan.json match on Windows, macOS, Linux and CI.
+* text=auto eol=lf
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.webp binary
+*.gif binary
+*.avif binary
+*.woff binary
+*.woff2 binary
