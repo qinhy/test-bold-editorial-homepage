@@ -56,8 +56,8 @@
     },
     {
       "source_id": "explore-the-model:1",
-      "component": "editorial_intro",
-      "variant": "asymmetric_prose"
+      "component": "call_to_action",
+      "variant": "dark_band"
     }
   ]
 }
